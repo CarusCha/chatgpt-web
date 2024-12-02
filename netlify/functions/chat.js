@@ -8,14 +8,23 @@ exports.handler = async function (event, context) {
         body: JSON.stringify({ error: "Unauthorized: Missing or invalid API key" }),
       };
     }
-    const apiKey = authHeader.split(" ")[1]; // Extract the key after "Bearer"
+    const apiKey = authHeader.split(" ")[1];
 
     // OpenAI API endpoint
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
-    // Forward the body and headers as-is, except for authorization
-    const body = JSON.parse(event.body);
+    // Parse the body only if it's valid JSON
+    let body;
+    try {
+      body = JSON.parse(event.body);
+    } catch (parseError) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Invalid JSON in request body" }),
+      };
+    }
 
+    // Forward the request to OpenAI API
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
