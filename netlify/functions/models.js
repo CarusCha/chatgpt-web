@@ -1,20 +1,21 @@
-
-import { getApiKey } from './getApiKey';
-
 exports.handler = async function (event, context) {
   try {
-    const apiKey = getApiKey();
+    const authHeader = event.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ error: "Unauthorized: Missing or invalid API key" }),
+      };
+    }
+    const apiKey = authHeader.split(" ")[1];
+
     const apiUrl = "https://api.openai.com/v1/models";
 
-    const body = JSON.parse(event.body);
-
     const response = await fetch(apiUrl, {
-      method: "POST",
+      method: "GET",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify(body),
     });
 
     const data = await response.json();
