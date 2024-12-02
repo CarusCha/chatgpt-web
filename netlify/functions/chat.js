@@ -1,5 +1,8 @@
 exports.handler = async function (event, context) {
   try {
+    // Log event.body to debug
+    console.log("Raw body:", event.body);
+
     // Extract the API key from the Authorization header
     const authHeader = event.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -10,21 +13,24 @@ exports.handler = async function (event, context) {
     }
     const apiKey = authHeader.split(" ")[1];
 
-    // OpenAI API endpoint
-    const apiUrl = "https://api.openai.com/v1/chat/completions";
-
-    // Parse the body only if it's valid JSON
+    // Parse the body only if it's a string
     let body;
-    try {
-      body = JSON.parse(event.body);
-    } catch (parseError) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Invalid JSON in request body" }),
-      };
+    if (typeof event.body === "string") {
+      try {
+        body = JSON.parse(event.body);
+      } catch (parseError) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: "Invalid JSON in request body" }),
+        };
+      }
+    } else {
+      body = event.body; // Assume it's already parsed
     }
 
     // Forward the request to OpenAI API
+    const apiUrl = "https://api.openai.com/v1/chat/completions";
+
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
