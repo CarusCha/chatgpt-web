@@ -1,16 +1,20 @@
 
-const fetch = require("node-fetch");
+const { getApiKey } = require("./getApiKey");
 
 exports.handler = async function (event, context) {
   try {
-    const { OPENAI_API_KEY } = process.env;
+    const apiKey = getApiKey();
     const apiUrl = "https://api.openai.com/v1/models";
 
+    const body = JSON.parse(event.body);
+
     const response = await fetch(apiUrl, {
-      method: "GET",
+      method: "POST",
       headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
       },
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
