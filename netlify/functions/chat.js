@@ -1,9 +1,9 @@
+import { getApiKey } from './getApiKey';
 
-const { getApiKey } = require("./getApiKey");
-
-exports.handler = async function (event, context) {
+export async function handler (event, context) {
   try {
     const apiKey = getApiKey();
+    console.log(apiKey);
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
     const body = JSON.parse(event.body);
@@ -29,4 +29,4 @@ exports.handler = async function (event, context) {
       body: JSON.stringify({ error: error.message }),
     };
   }
-};
+}

@@ -1,5 +1,5 @@
 
-const { getApiKey } = require("./getApiKey");
+import { getApiKey } from './getApiKey';
 
 exports.handler = async function (event, context) {
   try {
