@@ -23,13 +23,26 @@ exports.handler = async function (event, context) {
       body: event.body, // Directly pass the raw body
     });
 
-    // Return the response from OpenAI API without modification
+    // Check if the response is a stream
+    if (response.headers.get("Content-Type") === "text/event-stream") {
+      return {
+        statusCode: response.status,
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+        body: await response.text(), // Return the stream as plain text
+      };
+    }
+
+    // For non-streaming responses, return as JSON
     return {
       statusCode: response.status,
       headers: {
         "Content-Type": "application/json",
       },
-      body: await response.text(), // Pass the raw response body as text
+      body: await response.text(),
     };
   } catch (error) {
     return {
