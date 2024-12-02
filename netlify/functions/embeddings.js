@@ -1,5 +1,6 @@
 exports.handler = async function (event, context) {
   try {
+    // Extract the API key from the Authorization header
     const authHeader = event.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return {
@@ -9,23 +10,26 @@ exports.handler = async function (event, context) {
     }
     const apiKey = authHeader.split(" ")[1];
 
+    // OpenAI API endpoint
     const apiUrl = "https://api.openai.com/v1/embeddings";
-    const body = JSON.parse(event.body);
 
+    // Forward the POST request to OpenAI API without parsing the body
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify(body),
+      body: event.body, // Directly pass the raw body
     });
 
-    const data = await response.json();
-
+    // Return the response from OpenAI API without modification
     return {
       statusCode: response.status,
-      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: await response.text(),
     };
   } catch (error) {
     return {
