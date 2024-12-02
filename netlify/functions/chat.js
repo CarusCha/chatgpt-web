@@ -1,11 +1,19 @@
-import { getApiKey } from './getApiKey';
-
-export async function handler (event, context) {
+exports.handler = async function (event, context) {
   try {
-    const apiKey = getApiKey();
-    console.log(apiKey);
+    // Extract the API key from the Authorization header
+    const authHeader = event.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ error: "Unauthorized: Missing or invalid API key" }),
+      };
+    }
+    const apiKey = authHeader.split(" ")[1]; // Extract the key after "Bearer"
+
+    // OpenAI API endpoint
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
+    // Forward the body and headers as-is, except for authorization
     const body = JSON.parse(event.body);
 
     const response = await fetch(apiUrl, {
@@ -29,4 +37,4 @@ export async function handler (event, context) {
       body: JSON.stringify({ error: error.message }),
     };
   }
-}
+};
